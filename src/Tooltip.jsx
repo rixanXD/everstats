@@ -2,6 +2,7 @@ import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { attributes, classes, dynamicCellStyle } from './helpers/helpers';
 
 export default forwardRef((props, ref) => {
+    // eslint-disable-next-line
     const [data, setData] = useState(
         props.api.getDisplayedRowAtIndex(props.rowIndex).data
     );
