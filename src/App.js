@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { render } from 'react-dom';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import Tooltip from './Tooltip';
 
@@ -112,9 +111,6 @@ const App = () => {
                                 'Primary Attribute';
                         }
 
-                        // item.tier = item.tier || 'NONE';
-
-                        console.log('effects', item.effect_list);
                         if (item.effect_list) {
                             let desc = '';
                             item.effect_list.forEach((effect) => {
@@ -124,8 +120,6 @@ const App = () => {
                             item.effectdesc = desc;
                         }
                     });
-                    console.log(globalModifiers);
-                    // console.log(allItems);
                     updateData(allItems);
                     addGridToWindow();
                     return;
@@ -264,7 +258,7 @@ const App = () => {
                                 >
                                     {level.map((lev) => (
                                         <option
-                                            selected={lev == 70}
+                                            selected={lev === 70}
                                             key={'min' + lev}
                                             value={lev}
                                         >
@@ -284,7 +278,7 @@ const App = () => {
                                 >
                                     {level.map((lev) => (
                                         <option
-                                            selected={lev == 70}
+                                            selected={lev === 70}
                                             key={'max' + lev}
                                             value={lev}
                                         >
