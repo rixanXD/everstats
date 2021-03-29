@@ -17,7 +17,8 @@ const App = () => {
     const [gridApi, setGridApi] = useState(null);
     const [gridColumnApi, setGridColumnApi] = useState(null);
     const [rowData, setRowData] = useState([]);
-    const [showFilters, setShowFilters] = useState(false);
+    const [showFilters, setShowFilters] = useState(true);
+    const [findingItems, setFindingItems] = useState(false);
 
     const updateData = (data) => {
         setRowData(data);
@@ -67,6 +68,7 @@ const App = () => {
     };
 
     const getData = () => {
+        setFindingItems(true);
         return fetch(
             `http://census.daybreakgames.com/s:eq2calculator/count/eq2/item/${createQueryString()}`
         )
@@ -90,46 +92,52 @@ const App = () => {
                                 return data.item_list;
                             });
                     })
-                ).then((responses) => {
-                    let allItems = [];
-                    responses.forEach((resp) => {
-                        allItems = [...allItems, ...resp];
+                )
+                    .then((responses) => {
+                        let allItems = [];
+                        responses.forEach((resp) => {
+                            allItems = [...allItems, ...resp];
+                        });
+                        let globalModifiers = {};
+                        allItems.forEach((item) => {
+                            globalModifiers = {
+                                ...globalModifiers,
+                                ...item.modifiers,
+                            };
+                            item.modifiers.primaryAttribute =
+                                item?.modifiers?.strength ||
+                                item?.modifiers?.intelligence ||
+                                item?.modifiers?.agility ||
+                                item?.modifiers?.wisdom;
+
+                            if (item?.modifiers?.primaryAttribute) {
+                                item.modifiers.primaryAttribute.displayname =
+                                    'Primary Attribute';
+                            }
+
+                            // item.tier = item.tier || 'NONE';
+
+                            console.log('effects', item.effect_list);
+                            if (item.effect_list) {
+                                let desc = '';
+                                item.effect_list.forEach((effect) => {
+                                    desc += effect.description + '<br></br>';
+                                });
+
+                                item.effectdesc = desc;
+                            }
+                        });
+                        console.log(globalModifiers);
+                        // console.log(allItems);
+                        updateData(allItems);
+                        addGridToWindow();
+                        setFindingItems(false);
+                        return;
+                    })
+                    .catch((err) => {
+                        setFindingItems(false);
+                        console.log(err);
                     });
-                    let globalModifiers = {};
-                    allItems.forEach((item) => {
-                        globalModifiers = {
-                            ...globalModifiers,
-                            ...item.modifiers,
-                        };
-                        item.modifiers.primaryAttribute =
-                            item?.modifiers?.strength ||
-                            item?.modifiers?.intelligence ||
-                            item?.modifiers?.agility ||
-                            item?.modifiers?.wisdom;
-
-                        if (item?.modifiers?.primaryAttribute) {
-                            item.modifiers.primaryAttribute.displayname =
-                                'Primary Attribute';
-                        }
-
-                        // item.tier = item.tier || 'NONE';
-
-                        console.log('effects', item.effect_list);
-                        if (item.effect_list) {
-                            let desc = '';
-                            item.effect_list.forEach((effect) => {
-                                desc += effect.description + '<br></br>';
-                            });
-
-                            item.effectdesc = desc;
-                        }
-                    });
-                    console.log(globalModifiers);
-                    // console.log(allItems);
-                    updateData(allItems);
-                    addGridToWindow();
-                    return;
-                });
             });
     };
 
@@ -142,14 +150,14 @@ const App = () => {
     return (
         <div>
             <div id='filters'>
-                <div className='mb-3'>
+                {/* <div className='mb-3'>
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className='btn btn-sm btn-secondary'
                     >
                         {showFilters ? 'Hide Filters' : 'Show Filters'}
                     </button>
-                </div>
+                </div> */}
                 {showFilters && (
                     <div>
                         <div className='row'>
@@ -298,7 +306,7 @@ const App = () => {
                                 onClick={getData}
                                 className='btn btn-sm btn-secondary align-self-end'
                             >
-                                Get Items
+                                Find Items
                             </button>
                         </div>
                     </div>
@@ -370,7 +378,8 @@ const App = () => {
                         field='effectdesc'
                         headerName='Effect'
                         enableValue={true}
-                        hide={true}
+                        // hide={true}
+                        filter='agTextColumnFilter'
                         // cellRenderer={<div>test</div>}
                     />
 
